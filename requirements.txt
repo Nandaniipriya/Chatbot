@@ -4,3 +4,12 @@ python-dotenv
 langchain_community
 langchain_core
 streamlit
+ipykernel
+pypdf
+bs4
+arxiv
+langchain-text-splitters
+sentence_transformers
+langchain_huggingface
+langchain_chroma
+pandas

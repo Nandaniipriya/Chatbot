@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from langchain_groq import ChatGroq
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 ## load the groq api key
 os.environ['GROQ_API_KEY']=os.getenv("GROQ_API_KEY")
+os.environ['HF_TOKEN']=os.getenv("HF_TOKEN")
 
 groq_api_key=os.getenv("GROQ_API_KEY")
 llm=ChatGroq(groq_api_key=groq_api_key,model_name="Gemma-7b-It")
@@ -30,7 +31,7 @@ prompt=ChatPromptTemplate.from_template(
 
 def create_vector_embedding():
     if"vectors" not in st.session_state:
-        st.session_state.embeddings=OllamaEmbeddings()
+        st.session_state.embeddings=HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         st.session_state.loader=PyPDFDirectoryLoader("research_papers")## Data ingestion step
         st.session_state.docs=st.session_state.loader.load() ## Document loading
         st.session_state.text_splitter=RecursiveCharacterTextSplitter(chunk_size=1000,chunk_overlap=200)

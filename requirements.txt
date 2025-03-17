@@ -11,5 +11,5 @@ arxiv
 langchain-text-splitters
 sentence_transformers
 langchain_huggingface
-langchain_chroma
+langchain-chroma
 pandas

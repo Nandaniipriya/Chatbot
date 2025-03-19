@@ -1,6 +1,7 @@
 ##RAG Q&A Conversation With PDF i NVLUIDING cHAT hISTORY
 import streamlit as st
-from langchain.chains import create_history_aware_retriever, create_retrieval_chain
+from langchain.chains.history_aware_retriever import create_history_aware_retriever
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_chroma import Chroma
 from langchain_community.chat_message_histories import ChatMessageHistory
@@ -11,8 +12,8 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
-import os
 
+import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -28,7 +29,7 @@ api_key=st.text_input("Enter your Groq API key:",type="password")
 
 ##Check if groq api key is provided
 if api_key:
-    llm=ChatGroq(groq_api_key=api_key,model="Gemmma2-9b-It")
+    llm=ChatGroq(groq_api_key=api_key,model="gemma2-9b-it")
     
     
     session_id=st.text_input("Session ID",value="default_session")
@@ -55,7 +56,12 @@ if api_key:
         #Split and create embeddings for the documents
         text_splitter=RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=200)
         splits=text_splitter.split_documents(documents)
-        vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+        persist_directory = "./chroma_db"
+        vectorstore = Chroma.from_documents(
+            documents=splits, 
+            embedding=embeddings,
+            persist_directory=persist_directory
+        )
         retriever=vectorstore.as_retriever()
         
         contextualize_q_system_prompt=(
@@ -99,7 +105,7 @@ if api_key:
         def get_session_history(session:str)->BaseChatMessageHistory:
             if session_id not in st.session_state.store:
                 st.session_state.store[session_id]=ChatMessageHistory()
-                return st.session_state.store[session_id]
+            return st.session_state.store[session_id]
         
         conversational_rag_chain=RunnableWithMessageHistory(
             rag_chain,get_session_history,
